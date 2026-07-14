@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  ADMIN
+  PROFESSOR
+}
+
+enum TrainingLevel {
+  WTE1
+  WTE2
+  WTE3
+}
+
+enum ClassStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
+enum ChangeRequestType {
+  PROFESSOR_CHANGE
+  TIME_CHANGE
+}
+
+enum ChangeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Unit {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  createdAt DateTime @default(now())
+
+  students Student[]
+  classes  ClassSession[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  phone        String?
+  address      String?
+  cref         String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  registeredStudents Student[]            @relation("StudentRegisteredBy")
+  classesTaught      ClassSession[]       @relation("ClassProfessor")
+  classesCreated     ClassSession[]       @relation("ClassCreatedBy")
+  changeRequestsMade ScheduleChangeRequest[] @relation("ChangeRequestedBy")
+  changeRequestsReviewed ScheduleChangeRequest[] @relation("ChangeReviewedBy")
+  proposedInRequests ScheduleChangeRequest[] @relation("ChangeProposedProfessor")
+}
+
+model Student {
+  id      String @id @default(cuid())
+  name    String
+  address String
+  phone   String
+  cpf     String @unique
+  email   String?
+
+  trainingLevel TrainingLevel
+
+  guardianName         String?
+  guardianRelationship String?
+  guardianAddress      String?
+  guardianPhone        String?
+
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  unit               Unit   @relation(fields: [unitId], references: [id])
+  unitId             String
+  registeredBy       User   @relation("StudentRegisteredBy", fields: [registeredById], references: [id])
+  registeredById     String
+
+  attendances Attendance[]
+}
+
+model ClassSession {
+  id              String      @id @default(cuid())
+  unit            Unit        @relation(fields: [unitId], references: [id])
+  unitId          String
+  professor       User        @relation("ClassProfessor", fields: [professorId], references: [id])
+  professorId     String
+  scheduledAt     DateTime
+  durationMinutes Int         @default(60)
+  status          ClassStatus @default(SCHEDULED)
+  pricePerHour    Float?
+  createdBy       User        @relation("ClassCreatedBy", fields: [createdById], references: [id])
+  createdById     String
+  createdAt       DateTime    @default(now())
+
+  attendances     Attendance[]
+  changeRequests  ScheduleChangeRequest[]
+}
+
+model Attendance {
+  id                String       @id @default(cuid())
+  classSession      ClassSession @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+  classSessionId    String
+  student           Student      @relation(fields: [studentId], references: [id])
+  studentId         String
+  present           Boolean      @default(true)
+  signatureDataUrl  String?
+  signedByName      String?
+  signedAt          DateTime?
+
+  @@unique([classSessionId, studentId])
+}
+
+model ScheduleChangeRequest {
+  id                  String               @id @default(cuid())
+  classSession        ClassSession         @relation(fields: [classSessionId], references: [id])
+  classSessionId      String
+  requestedBy         User                 @relation("ChangeRequestedBy", fields: [requestedById], references: [id])
+  requestedById       String
+  type                ChangeRequestType
+  proposedProfessor   User?                @relation("ChangeProposedProfessor", fields: [proposedProfessorId], references: [id])
+  proposedProfessorId String?
+  proposedScheduledAt DateTime?
+  reason              String
+  status              ChangeRequestStatus  @default(PENDING)
+  reviewedBy          User?                @relation("ChangeReviewedBy", fields: [reviewedById], references: [id])
+  reviewedById        String?
+  reviewedAt          DateTime?
+  createdAt           DateTime             @default(now())
+}
