@@ -18,8 +18,8 @@ export async function requestScheduleChange(
   const parsed = changeRequestSchema.safeParse({
     classSessionId: formData.get("classSessionId"),
     type: formData.get("type"),
-    proposedProfessorId: formData.get("proposedProfessorId"),
-    proposedScheduledAt: formData.get("proposedScheduledAt"),
+    proposedProfessorId: formData.get("proposedProfessorId") || undefined,
+    proposedScheduledAt: formData.get("proposedScheduledAt") || undefined,
     reason: formData.get("reason"),
   });
   if (!parsed.success) {

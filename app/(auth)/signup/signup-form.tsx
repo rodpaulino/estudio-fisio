@@ -2,9 +2,10 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import { requestSignup, type SignupFormState } from "./actions";
 
 export function SignupForm() {
@@ -20,11 +21,8 @@ export function SignupForm() {
           Solicitação enviada! Assim que um administrador aprovar seu cadastro,
           você poderá entrar normalmente com o email e a senha que definiu.
         </p>
-        <Link
-          href="/login"
-          className="text-sm text-primary underline underline-offset-4"
-        >
-          Voltar para o login
+        <Link href="/login" className={cn(buttonVariants(), "w-full")}>
+          OK
         </Link>
       </div>
     );

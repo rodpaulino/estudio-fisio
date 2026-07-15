@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,6 +36,7 @@ export function RequestChangeDialog({
   alreadyRequested: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [type, setType] = useState<"PROFESSOR_CHANGE" | "TIME_CHANGE">(
     "PROFESSOR_CHANGE"
   );
@@ -49,12 +49,42 @@ export function RequestChangeDialog({
   useEffect(() => {
     if (wasPending.current && !pending) {
       if (!state?.error && !state?.fieldErrors) {
-        setOpen(false);
-        toast.success("Solicitação enviada.");
+        setSubmitted(true);
       }
     }
     wasPending.current = pending;
   }, [pending, state]);
+
+  if (submitted) {
+    return (
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (!next) setSubmitted(false);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Solicitação enviada</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-slate-600">
+            Sua solicitação de troca foi enviada e vai aparecer para o
+            administrador aprovar.
+          </p>
+          <Button
+            className="w-full"
+            onClick={() => {
+              setOpen(false);
+              setSubmitted(false);
+            }}
+          >
+            OK
+          </Button>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   if (alreadyRequested) {
     return (
