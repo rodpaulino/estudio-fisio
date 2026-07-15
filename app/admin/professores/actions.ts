@@ -4,9 +4,13 @@ import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth-guard";
-import { professorSchema } from "@/lib/validations";
+import { professorSchema, resetPasswordSchema } from "@/lib/validations";
 
 export type ProfessorFormState =
+  | { error?: string; fieldErrors?: Record<string, string[]> }
+  | undefined;
+
+export type ResetPasswordFormState =
   | { error?: string; fieldErrors?: Record<string, string[]> }
   | undefined;
 
@@ -68,7 +72,6 @@ export async function updateProfessor(
     phone: formData.get("phone"),
     email: formData.get("email"),
     cref: formData.get("cref"),
-    password: formData.get("password") || undefined,
   });
   if (!parsed.success) {
     return { fieldErrors: parsed.error.flatten().fieldErrors };
@@ -88,10 +91,32 @@ export async function updateProfessor(
       phone: parsed.data.phone,
       email,
       cref: parsed.data.cref,
-      ...(parsed.data.password
-        ? { passwordHash: await bcrypt.hash(parsed.data.password, 10) }
-        : {}),
     },
+  });
+
+  revalidatePath("/admin/professores");
+  return undefined;
+}
+
+export async function resetProfessorPassword(
+  professorId: string,
+  _prevState: ResetPasswordFormState,
+  formData: FormData
+): Promise<ResetPasswordFormState> {
+  await requireUser("ADMIN");
+
+  const parsed = resetPasswordSchema.safeParse({
+    password: formData.get("password"),
+  });
+  if (!parsed.success) {
+    return { fieldErrors: parsed.error.flatten().fieldErrors };
+  }
+
+  const passwordHash = await bcrypt.hash(parsed.data.password, 10);
+
+  await prisma.user.update({
+    where: { id: professorId },
+    data: { passwordHash },
   });
 
   revalidatePath("/admin/professores");

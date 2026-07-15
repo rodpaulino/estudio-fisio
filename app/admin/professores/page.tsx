@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProfessorFormDialog } from "@/components/forms/professor-form-dialog";
+import { ResetPasswordDialog } from "@/components/forms/reset-password-dialog";
 import { prisma } from "@/lib/prisma";
 import { toggleProfessorActive } from "./actions";
 
@@ -62,6 +63,10 @@ export default async function ProfessoresPage() {
               <TableCell>
                 <div className="flex justify-end gap-2">
                   <ProfessorFormDialog professor={professor} />
+                  <ResetPasswordDialog
+                    professorId={professor.id}
+                    professorName={professor.name}
+                  />
                   <form
                     action={toggleProfessorActive.bind(
                       null,

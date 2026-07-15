@@ -28,6 +28,10 @@ export default async function LoginPage() {
               Solicitar criação de usuário
             </Link>
           </p>
+          <p className="text-center text-sm text-slate-500">
+            Esqueceu sua senha? Peça para o administrador do estúdio
+            redefinir na tela de Professores.
+          </p>
         </CardContent>
       </Card>
     </div>

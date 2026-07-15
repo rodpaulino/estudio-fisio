@@ -8,6 +8,10 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Informe a senha."),
 });
 
+export const resetPasswordSchema = z.object({
+  password: z.string().min(6, "A senha deve ter ao menos 6 caracteres."),
+});
+
 export const unitSchema = z.object({
   name: z.string().trim().min(2, "Nome da unidade é obrigatório."),
   address: z.string().trim().min(5, "Endereço é obrigatório."),

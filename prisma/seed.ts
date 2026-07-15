@@ -14,7 +14,7 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
-    update: {},
+    update: { passwordHash, active: true },
     create: {
       name: "Administrador",
       email: adminEmail,
@@ -35,6 +35,9 @@ async function main() {
 
   console.log("Seed concluído.");
   console.log(`Admin: ${admin.email} / senha: ${adminPassword}`);
+  console.log(
+    "Dica: para recuperar/redefinir a senha do admin, defina SEED_ADMIN_PASSWORD e rode este seed novamente."
+  );
 }
 
 main()

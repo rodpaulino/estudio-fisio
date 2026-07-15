@@ -107,15 +107,15 @@ export function ProfessorFormDialog({ professor }: { professor?: Professor }) {
               <p className="text-sm text-red-600">{state.fieldErrors.cref[0]}</p>
             )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">
-              {isEdit ? "Nova senha (opcional)" : "Senha inicial"}
-            </Label>
-            <Input id="password" name="password" type="password" required={!isEdit} />
-            {state?.fieldErrors?.password && (
-              <p className="text-sm text-red-600">{state.fieldErrors.password[0]}</p>
-            )}
-          </div>
+          {!isEdit && (
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha inicial</Label>
+              <Input id="password" name="password" type="password" required />
+              {state?.fieldErrors?.password && (
+                <p className="text-sm text-red-600">{state.fieldErrors.password[0]}</p>
+              )}
+            </div>
+          )}
           <Button type="submit" className="w-full" disabled={pending}>
             {pending ? "Salvando..." : "Salvar"}
           </Button>
