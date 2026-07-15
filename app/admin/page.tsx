@@ -2,19 +2,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminHomePage() {
-  const [unitCount, professorCount, studentCount, pendingRequests] =
+  const [unitCount, professorCount, studentCount, pendingChangeRequests, pendingSignups] =
     await Promise.all([
       prisma.unit.count(),
       prisma.user.count({ where: { role: "PROFESSOR", active: true } }),
       prisma.student.count({ where: { active: true } }),
       prisma.scheduleChangeRequest.count({ where: { status: "PENDING" } }),
+      prisma.user.count({ where: { role: "PROFESSOR", pendingApproval: true } }),
     ]);
 
   const stats = [
     { label: "Unidades", value: unitCount },
     { label: "Professores ativos", value: professorCount },
     { label: "Alunos ativos", value: studentCount },
-    { label: "Aprovações pendentes", value: pendingRequests },
+    { label: "Aprovações pendentes", value: pendingChangeRequests + pendingSignups },
   ];
 
   return (

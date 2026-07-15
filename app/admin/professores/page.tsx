@@ -43,8 +43,20 @@ export default async function ProfessoresPage() {
               <TableCell>{professor.cref}</TableCell>
               <TableCell>{professor.phone}</TableCell>
               <TableCell>
-                <Badge variant={professor.active ? "default" : "secondary"}>
-                  {professor.active ? "Ativo" : "Inativo"}
+                <Badge
+                  variant={
+                    professor.active
+                      ? "default"
+                      : professor.pendingApproval
+                        ? "destructive"
+                        : "secondary"
+                  }
+                >
+                  {professor.active
+                    ? "Ativo"
+                    : professor.pendingApproval
+                      ? "Aguardando aprovação"
+                      : "Inativo"}
                 </Badge>
               </TableCell>
               <TableCell>

@@ -10,7 +10,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
-import { approveChangeRequest, rejectChangeRequest } from "./actions";
+import {
+  approveChangeRequest,
+  rejectChangeRequest,
+  approveProfessorSignup,
+  rejectProfessorSignup,
+} from "./actions";
 
 const typeLabels: Record<string, string> = {
   PROFESSOR_CHANGE: "Troca de professor",
@@ -43,7 +48,7 @@ function describeProposal(request: {
 }
 
 export default async function AprovacoesPage() {
-  const [pending, history] = await Promise.all([
+  const [pending, history, pendingSignups] = await Promise.all([
     prisma.scheduleChangeRequest.findMany({
       where: { status: "PENDING" },
       include: {
@@ -64,6 +69,10 @@ export default async function AprovacoesPage() {
       orderBy: { reviewedAt: "desc" },
       take: 20,
     }),
+    prisma.user.findMany({
+      where: { role: "PROFESSOR", pendingApproval: true },
+      orderBy: { createdAt: "asc" },
+    }),
   ]);
 
   return (
@@ -71,8 +80,55 @@ export default async function AprovacoesPage() {
       <div>
         <h1 className="text-2xl font-semibold">Aprovações</h1>
         <p className="text-sm text-slate-500">
-          Solicitações de troca de professor ou horário feitas pelos professores.
+          Solicitações de cadastro de professor e de troca de professor ou
+          horário.
         </p>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-lg font-medium">Solicitações de cadastro</h2>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>CREF</TableHead>
+              <TableHead>Telefone</TableHead>
+              <TableHead className="w-48" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {pendingSignups.map((signup) => (
+              <TableRow key={signup.id}>
+                <TableCell className="font-medium">{signup.name}</TableCell>
+                <TableCell>{signup.email}</TableCell>
+                <TableCell>{signup.cref}</TableCell>
+                <TableCell>{signup.phone}</TableCell>
+                <TableCell>
+                  <div className="flex justify-end gap-2">
+                    <form action={approveProfessorSignup.bind(null, signup.id)}>
+                      <Button type="submit" size="sm">
+                        Aprovar
+                      </Button>
+                    </form>
+                    <form action={rejectProfessorSignup.bind(null, signup.id)}>
+                      <Button type="submit" variant="destructive" size="sm">
+                        Rejeitar
+                      </Button>
+                    </form>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+            {pendingSignups.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-slate-500">
+                  Nenhuma solicitação de cadastro pendente.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       <div className="space-y-4">

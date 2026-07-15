@@ -102,7 +102,9 @@ export async function toggleProfessorActive(professorId: string, active: boolean
   await requireUser("ADMIN");
   await prisma.user.update({
     where: { id: professorId },
-    data: { active },
+    data: { active, ...(active ? { pendingApproval: false } : {}) },
   });
   revalidatePath("/admin/professores");
+  revalidatePath("/admin/aprovacoes");
+  revalidatePath("/admin");
 }

@@ -49,3 +49,32 @@ export async function rejectChangeRequest(requestId: string) {
 
   revalidatePath("/admin/aprovacoes");
 }
+
+export async function approveProfessorSignup(userId: string) {
+  await requireUser("ADMIN");
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user || user.role !== "PROFESSOR" || !user.pendingApproval) return;
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { active: true, pendingApproval: false },
+  });
+
+  revalidatePath("/admin/aprovacoes");
+  revalidatePath("/admin/professores");
+  revalidatePath("/admin");
+}
+
+export async function rejectProfessorSignup(userId: string) {
+  await requireUser("ADMIN");
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user || user.role !== "PROFESSOR" || !user.pendingApproval) return;
+
+  await prisma.user.delete({ where: { id: userId } });
+
+  revalidatePath("/admin/aprovacoes");
+  revalidatePath("/admin/professores");
+  revalidatePath("/admin");
+}

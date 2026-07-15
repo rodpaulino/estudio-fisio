@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { auth } from "@/auth";
-import { LoginForm } from "./login-form";
+import { SignupForm } from "./signup-form";
 
-export default async function LoginPage() {
+export default async function SignupPage() {
   const session = await auth();
 
   if (session?.user) {
@@ -15,19 +14,14 @@ export default async function LoginPage() {
     <div className="flex flex-1 items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-xl">Estúdio Fisio</CardTitle>
+          <CardTitle className="text-xl">Solicitar acesso</CardTitle>
           <p className="text-sm text-slate-500">
-            Entre com seu email e senha
+            Preencha seus dados para solicitar acesso como professor. Um
+            administrador vai revisar e aprovar seu cadastro.
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <LoginForm />
-          <p className="text-center text-sm text-slate-500">
-            Ainda não tem acesso?{" "}
-            <Link href="/signup" className="text-primary underline underline-offset-4">
-              Solicitar criação de usuário
-            </Link>
-          </p>
+        <CardContent>
+          <SignupForm />
         </CardContent>
       </Card>
     </div>

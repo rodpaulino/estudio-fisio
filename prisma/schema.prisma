@@ -55,6 +55,7 @@ model User {
   address      String?
   cref         String?
   active       Boolean  @default(true)
+  pendingApproval Boolean @default(false)
   createdAt    DateTime @default(now())
 
   registeredStudents Student[]            @relation("StudentRegisteredBy")
