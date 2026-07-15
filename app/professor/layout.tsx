@@ -3,6 +3,7 @@ import { NavBar } from "@/components/nav-bar";
 
 const links = [
   { href: "/professor", label: "Minhas Aulas" },
+  { href: "/professor/alunos", label: "Alunos" },
   { href: "/professor/historico", label: "Meu Histórico" },
 ];
 

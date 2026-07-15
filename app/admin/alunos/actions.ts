@@ -29,7 +29,7 @@ export async function createStudent(
   _prevState: StudentFormState,
   formData: FormData
 ): Promise<StudentFormState> {
-  const user = await requireUser("ADMIN");
+  const user = await requireUser(["ADMIN", "PROFESSOR"]);
 
   const parsed = parseStudent(formData);
   if (!parsed.success) {
@@ -61,6 +61,7 @@ export async function createStudent(
   });
 
   revalidatePath("/admin/alunos");
+  revalidatePath("/professor/alunos");
   return undefined;
 }
 

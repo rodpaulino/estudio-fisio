@@ -47,15 +47,47 @@ export const studentSchema = z.object({
   guardianPhone: z.string().trim().optional().or(z.literal("")),
 });
 
+function isWeekday(dateString: string): boolean {
+  const day = new Date(dateString).getDay();
+  return day !== 0 && day !== 6;
+}
+
 export const classSessionSchema = z.object({
   unitId: z.string().min(1, "Selecione a unidade."),
   professorId: z.string().min(1, "Selecione o professor."),
-  scheduledAt: z.string().min(1, "Informe a data e hora."),
+  scheduledAt: z
+    .string()
+    .min(1, "Informe a data e hora.")
+    .refine(isWeekday, {
+      message: "Não é possível agendar aulas aos sábados ou domingos.",
+    }),
   studentIds: z
     .array(z.string())
     .min(1, "Selecione ao menos 1 aluno.")
     .max(4, "No máximo 4 alunos por aula."),
 });
+
+export const recurringClassSessionSchema = z
+  .object({
+    unitId: z.string().min(1, "Selecione a unidade."),
+    professorId: z.string().min(1, "Selecione o professor."),
+    studentIds: z
+      .array(z.string())
+      .min(1, "Selecione ao menos 1 aluno.")
+      .max(4, "No máximo 4 alunos por aula."),
+    time: z
+      .string()
+      .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Informe um horário válido."),
+    weekdays: z
+      .array(z.string().regex(/^[1-5]$/))
+      .min(1, "Selecione ao menos um dia da semana entre segunda e sexta."),
+    startDate: z.string().min(1, "Informe a data de início."),
+    endDate: z.string().min(1, "Informe a data de término."),
+  })
+  .refine((data) => data.startDate <= data.endDate, {
+    message: "A data de término deve ser igual ou posterior à data de início.",
+    path: ["endDate"],
+  });
 
 export const changeRequestSchema = z
   .object({

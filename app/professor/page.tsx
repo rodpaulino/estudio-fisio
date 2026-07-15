@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { RequestChangeDialog } from "@/components/forms/request-change-dialog";
+import { ClassFormDialog } from "@/components/forms/class-form-dialog";
 import { requireUser } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
@@ -30,7 +31,7 @@ const statusVariants: Record<string, "default" | "secondary" | "destructive"> = 
 export default async function ProfessorHomePage() {
   const user = await requireUser("PROFESSOR");
 
-  const [classes, otherProfessors, pendingRequests] = await Promise.all([
+  const [classes, otherProfessors, pendingRequests, units, students] = await Promise.all([
     prisma.classSession.findMany({
       where: { professorId: user.id },
       include: { unit: true, attendances: { include: { student: true } } },
@@ -44,13 +45,21 @@ export default async function ProfessorHomePage() {
       where: { requestedById: user.id, status: "PENDING" },
       select: { classSessionId: true },
     }),
+    prisma.unit.findMany({ orderBy: { name: "asc" } }),
+    prisma.student.findMany({
+      where: { active: true },
+      orderBy: { name: "asc" },
+    }),
   ]);
 
   const pendingSet = new Set(pendingRequests.map((request) => request.classSessionId));
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Minhas aulas</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Minhas aulas</h1>
+        <ClassFormDialog units={units} students={students} fixedProfessorId={user.id} />
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
